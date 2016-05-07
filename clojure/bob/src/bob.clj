@@ -23,21 +23,16 @@
     :else "Whatever."))
 
 ; compare the performance between clojure.string/ends-with? and last.
-(defn- performance-test [func msg n]
-  (loop [n n]
-    (if (= n 0) (func msg)
-      (recur (dec n)))))
-
+; implement performance test with core functions repeatedly
 (defn do-performance-test
-  "run (do-performance-test) in repl to compare performance." 
-  ([] (do-performance-test 1000000))
+  ([] (do-performance-test 10000))
   ([n]
-   (do (print "question-v1?: ")
-       (time (performance-test question? "hello?" n))
-       (print "question-v2?: ")
-       (time (performance-test question-v2? "hello?" n))
-       (print "yell-v1?: ")
-       (time (performance-test yell? "HELLO?" n))
-       (print "yell-v2?: ")
-       (time (performance-test yell-v2? "HELLO?" n)))))
+   (print "question-v1?: ")
+   (time (dorun (repeatedly n #(question? "hello?"))))
+   (print "question-v2?: ")
+   (time (dorun (repeatedly n #(question-v2? "hello?"))))
+   (print "yell-v1?: ")
+   (time (dorun (repeatedly n #(yell? "HELLO?"))))
+   (print "yell-v2?: ")
+   (time (dorun (repeatedly n #(yell-v2? "HELLO?"))))))
 
