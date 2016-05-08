@@ -19,3 +19,33 @@
   (assert (valid-dna-strands? dnas))
   (str/join "" (map to-rna-nuclneotide dnas)))
 
+; ==========================================================================
+; Offical solution
+; ==========================================================================
+(def dna->rna {\G \C
+               \C \G
+               \A \U
+               \T \A})
+
+; use :post assert
+; ref: http://blog.csdn.net/linux2_scdn/article/details/41012581
+(defn- translate [c]
+  {:post [%]}
+  (dna->rna c))
+
+(defn to-rna-v2 [dna]
+  (apply str (map translate dna)))
+
+; ==========================================================================
+; Performance Test
+; ==========================================================================
+(defn do-performance-test
+  ([] (do-performance-test 10000))
+  ([n]
+   (println "======== performance test ========")
+   (print "to-rna: ")
+   (time (dorun (repeatedly n #(to-rna "ACGTGGTCTTAA"))))
+   (print "to-rna-v2: ")
+   (time (dorun (repeatedly n #(to-rna-v2 "ACGTGGTCTTAA"))))))
+
+(do-performance-test)
