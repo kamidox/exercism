@@ -40,4 +40,4 @@
    (print "word-count-v3: ")
    (time (dorun (repeatedly n #(word-count-v3 "hello joey and hello lily"))))))
 
-(do-performance-test)
+; (do-performance-test)

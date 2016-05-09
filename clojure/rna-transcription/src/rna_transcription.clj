@@ -48,4 +48,4 @@
    (print "to-rna-v2: ")
    (time (dorun (repeatedly n #(to-rna-v2 "ACGTGGTCTTAA"))))))
 
-(do-performance-test)
+; (do-performance-test)
