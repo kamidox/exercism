@@ -11,3 +11,30 @@
   [word anagrams]
   (filter (partial match? word) anagrams))
 
+; ==========================================================================
+; Offical solution
+; ==========================================================================
+(defn- anagram? [w c]
+  (let [w (str/lower-case w)
+        c (str/lower-case c)]
+    (and (= (sort w) (sort c))
+         (not= w c))))
+
+(defn anagrams-for-v2
+  [word anagrams]
+  (filter (partial anagram? word) anagrams))
+
+; ==========================================================================
+; Performance Test
+; ==========================================================================
+(defn do-performance-test
+  ([] (do-performance-test 100000))
+  ([n]
+   (println "==================== performance test ====================")
+   (print "anagrams-for: ")
+   (time (dorun (repeatedly n #(anagrams-for "ant" ["tan" "stand" "at"]))))
+   (print "anagrams-for-v2: ")
+   (time (dorun (repeatedly n #(anagrams-for-v2 "ant" ["tan" "stand" "at"]))))))
+
+; (do-performance-test)
+
