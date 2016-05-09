@@ -22,3 +22,13 @@
          ver-n (map verse seq-n)]
      (s/join "\n" ver-n))))
 
+; ================================================================================
+; Official solution introduce classic FP style of code: chain call
+; ================================================================================
+
+(defn sing-v2
+  ([fr] (sing fr 0))
+  ([fr to]
+   (->> (range fr (dec to) -1)
+        (map verse)
+        (s/join "\n"))))
