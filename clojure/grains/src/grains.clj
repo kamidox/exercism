@@ -1,7 +1,10 @@
 (ns grains)
 
-(defn square [n]
-  (if (= 1 n) 1 (* 2 (square (dec n)))))
+(defn- seq-grains [] (iterate (fn [n] (* n 2)) 1N))
 
-(defn total
-  (let [rng (range 64)]))
+(defn square [n]
+  (nth (seq-grains) (dec n)))
+
+(defn total []
+  (reduce + (take 64 (seq-grains))))
+
