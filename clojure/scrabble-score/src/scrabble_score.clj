@@ -1,7 +1,7 @@
 (ns scrabble-score
   (:require [clojure.string :as str]))
 
-(def letters-score
+(def ^:private letters-score
   {1 "AEIOULNRST"
    2 "DG"
    3 "BCMP"
