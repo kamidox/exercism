@@ -22,3 +22,23 @@
            (map-indexed (partial to-decimal-bit (dec cnt)))
            (reduce +)))))
 
+; ================================================================================
+; Officlal solution is beautiful than mine except the pow function.
+; ================================================================================
+(defn- power [[exponent bit]]
+  (if (= "1" bit)
+      (exp 2 exponent)
+      0))
+
+(defn- bits [string]
+  (->> string
+       (re-seq #"[10]")
+       reverse
+       (map-indexed vector)))
+
+(defn to-decimal-v2 [string]
+  (->> string
+       bits
+       (map power)
+       (apply +)))
+
