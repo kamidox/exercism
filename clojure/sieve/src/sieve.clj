@@ -1,6 +1,6 @@
 (ns sieve)
 
-(defn- divisible? [n p]
+(defn- prime-for? [n p]
   (or (<= n p) (not (zero? (mod n p)))))
 
 (defn sieve
@@ -9,5 +9,5 @@
   (loop [primes (range 2 (inc n)) idx 0]
     (if (<= (count primes) idx) primes
       (let [p (nth primes idx)]
-        (recur (filter #(divisible? % p) primes) (inc idx))))))
+        (recur (filter #(prime-for? % p) primes) (inc idx))))))
 
