@@ -1,14 +1,10 @@
 {
   "libs": [
-    "browser",
-    "jquery"
   ],
   "loadEagerly": [
   ],
   "plugins": {
-    "requirejs": {
-      "baseURL": "./",
-      "paths": {}
-    }
+    "node": {},
+    "complete_strings": {}
   }
 }
