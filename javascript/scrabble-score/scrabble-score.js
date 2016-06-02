@@ -9,9 +9,11 @@ var scoreTable = {
 };
 
 function scoreOf (element) {
+    'use strict';
+
     var keys = Object.keys(scoreTable);
     for (var i = 0; i < keys.length; i ++) {
-        if (keys[i].indexOf(element) != -1) {
+        if (keys[i].indexOf(element) !== -1) {
             return scoreTable[keys[i]];
         }
     }
@@ -19,13 +21,15 @@ function scoreOf (element) {
 }
 
 function score (txt) {
+    'use strict';
+
     if (!txt) {
         return 0;
     }
-    var chars = txt.split('').map(function (element, index, array) {
+    var chars = txt.split('').map(function (element) {
         return element.toUpperCase();
     });
-    return chars.reduce(function (total, element, index, array) {
+    return chars.reduce(function (total, element) {
         return total += scoreOf(element);
     }, 0);
 }
