@@ -1,4 +1,6 @@
 module.exports = function ETL() {
+    'use strict';
+
     function sortedKeys (old) {
         var values = [];
         var keys = Object.keys(old);
@@ -14,7 +16,7 @@ module.exports = function ETL() {
         var keys = Object.keys(old);
         key = key.toUpperCase();
         for (var i = 0; i < keys.length; i ++) {
-            if (old[keys[i]].indexOf(key) != -1) {
+            if (old[keys[i]].indexOf(key) !== -1) {
                 return parseInt(keys[i]);
             }
         }
@@ -22,7 +24,7 @@ module.exports = function ETL() {
     }
 
     function transform (old) {
-        keys = sortedKeys(old);
+        var keys = sortedKeys(old);
         return keys.reduce(function functionName(sorted, key) {
             sorted[key] = ValueOf(old, key);
             return sorted;

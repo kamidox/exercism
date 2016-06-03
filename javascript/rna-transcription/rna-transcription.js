@@ -6,16 +6,17 @@ var DnaTranscriber = function () {};
 // 3. https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace
 
 var dnaToRna = {
-  G: 'C',
-  C: 'G',
-  T: 'A',
-  A: 'U'
+    G: 'C',
+    C: 'G',
+    T: 'A',
+    A: 'U'
 };
 
 DnaTranscriber.prototype.toRna = function (dna) {
-  return dna.replace(/./g, function (match) {
-    return dnaToRna[match] || '';
-  });
+    'use strict';
+    return dna.replace(/./g, function (match) {
+        return dnaToRna[match] || '';
+    });
 };
 
 module.exports = DnaTranscriber;

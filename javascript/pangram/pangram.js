@@ -1,11 +1,13 @@
 var Pangram = function (text) {
+    'use strict';
   this.text = text;
 };
 
 // Official solution use string.replace(/[^a-z]+/gi, '') to clean non-ascii chars
 
 Pangram.prototype.isPangram = function () {
-  var chars = this.text.toLowerCase().split("").filter(function (element, index, array) {
+    'use strict';
+  var chars = this.text.toLowerCase().split("").filter(function (element) {
     if (element <= 'z' && element >= 'a') {
       return true;
     } else {
