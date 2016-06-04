@@ -45,7 +45,7 @@ function toRoman (n) {
 
     var digits = numberToDigits(n);
     var romans = digits.map(function (element, index, array) {
-        var level = element * Math.pow(10, (array.length - index - 1));
+        var level = Math.pow(10, (array.length - index - 1));
         return digitToRoman(element, level);
     });
     return romans.reduce(function (pVal, cVal) {
