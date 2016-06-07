@@ -1,4 +1,4 @@
-var NumberSystem = require ('./numer-system');
+var NumberSystem = require ('../binary/numer-system');
 
 function Trinary(val) {
     'use strict';
