@@ -18,7 +18,9 @@ function randomKey (len) {
     for (var i = 0; i < len; i ++) {
         ret[i] = code[Math.floor(Math.random() * code.length)];
     }
-    return ret;
+    return ret.reduce(function (pval, cval) {
+        return pval + cval;
+    }, '');
 }
 
 // the length of key must larger the length of txt
