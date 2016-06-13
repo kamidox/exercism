@@ -1,20 +1,22 @@
 function BinarySearchTree (rootVal) {
     'use strict';
 
-    var node = {
-        data: rootVal,
-        left: null,
-        right: null
-    };
-
-    node.insert = function (val) {
-        bstInsert(node, val);
-    };
-    node.each = function (handler) {
-        bstEach(node, handler);
-    };
-    return node;
+    this.data = rootVal;
+    this.left = null;
+    this.right = null;
 }
+
+BinarySearchTree.prototype.insert = function (val) {
+    'use strict';
+
+    bstInsert(this, val);
+};
+
+BinarySearchTree.prototype.each = function (handler) {
+    'use strict';
+
+    bstEach(this, handler);
+};
 
 function bstInsert (node, val) {
     'use strict';
