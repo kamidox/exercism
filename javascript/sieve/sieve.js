@@ -1,3 +1,18 @@
+/*!
+ * Sieve Primes JavaScript Library
+ *
+ * This library perform primes calculate by using Sieve algorithm
+ * For more infomation please refer to https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
+ *
+ * @example
+ * var SievePrimes = require('./sieve/sieve');
+ * var primes = new Sieve(10);
+ * console.log(primes.primes);
+ *
+ * Copyright 2016 Joey Huang
+ * Released under the MIT license
+ * https://github.com/kamidox/exercism
+ */
 function Sieve (limit) {
     'use strict';
 
@@ -30,6 +45,11 @@ function Sieve (limit) {
     }
 
     return {
+        /**
+         * Return all primes under limit
+         *
+         * @returns Array of all primes under limit
+         */
         primes: primes()
     };
 }
