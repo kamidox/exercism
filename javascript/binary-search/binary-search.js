@@ -23,11 +23,11 @@ function binSearch (arr, val, start, end) {
         return -1;
     }
 
-    var mid = Math.ceil((start + end) / 2);
+    var mid = Math.floor((start + end) / 2);
     if (arr[mid] > val) {
-        return binSearch(arr, val, start, mid - 1);
+        return binSearch(arr, val, start, mid);
     } else if (arr[mid] < val) {
-        return binSearch(arr, val, mid, end);
+        return binSearch(arr, val, mid + 1, end);
     } else {
         return mid;
     }
