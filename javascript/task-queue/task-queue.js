@@ -1,5 +1,4 @@
 /* javascript parallel execution: task queue */
-
 function TaskQueue (concurrency) {
     this.concurrency = concurrency;
     this.running = 0;
@@ -7,21 +6,25 @@ function TaskQueue (concurrency) {
 }
 
 TaskQueue.prototype.pushTask = function (task, callback) {
-    this.queue.push(task);
-    this.execNextTask();
+    this.queue.push([task, callback]);
+    this.nextTask();
 };
 
-TaskQueue.prototype.execNextTask = function () {
-    var self = this;
-    function done (err) {
-        self.running --;
-        process.nextTick(self.execNextTask);
-    }
-
-    while (self.running < self.concurrency && self.queue.length > 0) {
-        var task = self.queue.shift();
-        task(done);
-        self.running ++;
+TaskQueue.prototype.nextTask = function () {
+    while (this.running < this.concurrency && this.queue.length > 0) {
+        var [task, callback] = this.queue.shift();
+        task(err => {
+            callback(err, task);
+            this.running --;
+            /*
+             * FIXME: why `process.nextTick(this.nextTask);` do not work!!!
+             * sync & async hell!!!
+            **/
+            this.nextTask();
+        });
+        this.running ++;
     }
 };
+
+module.exports = TaskQueue;
 
