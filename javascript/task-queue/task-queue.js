@@ -19,7 +19,9 @@ TaskQueue.prototype.nextTask = function () {
             /*
              * FIXME: why `process.nextTick(this.nextTask);` do not work!!!
              * sync & async hell!!!
-            **/
+             **/
+            // console.log(`schedule task#${task.taskid}`);
+            // process.nextTick(this.nextTask);
             this.nextTask();
         });
         this.running ++;
