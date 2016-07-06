@@ -1,0 +1,20 @@
+{
+  "name": "spider",
+  "version": "0.0.1",
+  "description": "web spider to download resources recursively from a domain",
+  "main": "index.js",
+  "scripts": {
+    "index": "node index.js",
+    "test": "jasmine-node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kamidox/exercism/tree/master/javascript/spider"
+  },
+  "keywords": [
+    "spider",
+    "crawl"
+  ],
+  "author": "Joey Huang",
+  "license": "MIT"
+}
