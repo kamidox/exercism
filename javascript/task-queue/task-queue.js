@@ -11,19 +11,24 @@ TaskQueue.prototype.pushTask = function (task, callback) {
 };
 
 TaskQueue.prototype.nextTask = function () {
-    while (this.running < this.concurrency && this.queue.length > 0) {
-        var [task, callback] = this.queue.shift();
-        task(err => {
+
+    function makeCallback(self, task, callback) {
+        return function (err) {
             callback(err, task);
-            this.running --;
-            /*
+            self.running --;
+            /**
              * FIXME: why `process.nextTick(this.nextTask);` do not work!!!
              * sync & async hell!!!
              **/
             // console.log(`schedule task#${task.taskid}`);
             // process.nextTick(this.nextTask);
-            this.nextTask();
-        });
+            self.nextTask();
+        }
+    }
+
+    while (this.running < this.concurrency && this.queue.length > 0) {
+        var [task, callback] = this.queue.shift();
+        task(makeCallback(this, task, callback));
         this.running ++;
     }
 };
