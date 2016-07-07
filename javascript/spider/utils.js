@@ -18,3 +18,8 @@ module.exports.promisify = function (callbackBasedApi) {
     }
 };
 
+module.exports.urlToFilename = function (url) {
+    var pos = url.lastIndexOf('.');
+    return url.substr(pos + 1);
+}
+
