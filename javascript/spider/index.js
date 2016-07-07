@@ -1,7 +1,6 @@
 const spider = require('./spider');
 
-var url = 'http://blog.kamidox.com';
-var fname = './tmp/index.html'
-spider.download(url, fname)
-    .then((body) => console.log(`Download Successed. Size = ${body.length}`))
+var url = 'http://blog.kamidox.com/';
+spider.spider(url, 6)
+    .then(() => console.log(`Download Successed.`))
     .catch((err) => console.log(err));

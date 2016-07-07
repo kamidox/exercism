@@ -1,3 +1,8 @@
+
+var htmlParser = require('htmlparser2');
+var urlParser = require('url');
+var path = require('path');
+
 module.exports.promisify = function (callbackBasedApi) {
     return function promisified() {
         var args = [].slice.call(arguments);
@@ -18,8 +23,54 @@ module.exports.promisify = function (callbackBasedApi) {
     }
 };
 
-module.exports.urlToFilename = function (url) {
-    var pos = url.lastIndexOf('.');
-    return url.substr(pos + 1);
+module.exports.urlToFilename = function (url, root='./tmp') {
+    var fname = urlParser.parse(url).pathname;
+    fname = fname === '/' ? '/index.html' : fname;
+    return path.join(root, fname);
 }
 
+module.exports.getPageLinks = function (url, body) {
+    var linksSet = new Set();
+    var links = [];
+    var handler = {
+        onopentag: function (name, attrs) {
+            var tags = {
+                link: 'href',
+                script: 'src',
+                img: 'src',
+                a: 'href'
+            };
+            var href;
+            var keys = Object.keys(tags); 
+            var idx = keys.indexOf(name);
+            if (idx >= 0) {
+                href = attrs[tags[keys[idx]]];
+            }
+            if (href && _isSameDomain(url, href)) {
+                linksSet.add(_normalizeUrl(url, href));
+            }
+        },
+    }
+
+    var parser = new htmlParser.Parser(
+        handler,
+        {
+            lowerCaseTags: true,
+            lowerCaseAttributeNames: true
+        });
+    parser.write(body);
+    parser.end();
+    linksSet.forEach(link => links.push(link));
+    return links;
+}
+
+function _isSameDomain(url, href) {
+    var url1 = urlParser.parse(url);
+    var url2 = urlParser.parse(href.trim());
+
+    return url2.hostname === null || url1.hostname === url2.hostname;
+}
+
+function _normalizeUrl(url, href) {
+    return urlParser.resolve(url, href);
+}
