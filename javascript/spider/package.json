@@ -16,5 +16,9 @@
     "crawl"
   ],
   "author": "Joey Huang",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "mkdirp": "^0.5.1",
+    "request": "^2.72.0"
+  }
 }
