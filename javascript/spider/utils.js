@@ -55,7 +55,7 @@ module.exports.getPageLinks = function (url, body) {
             }
         },
         onprocessinginstruction: function (name, data) {
-            if (name === '!doctype' && data.endsWith('html')) {
+            if (name === '!doctype' && data.includes('html')) {
                 validHtml = true;
             }
         }

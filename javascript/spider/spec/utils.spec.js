@@ -20,6 +20,13 @@ describe('utils', function () {
         expect(links[0]).toEqual(url + '/' + 'theme/css/foundation.css');
     });
 
+    it('getPageLinks html instructions', function () {
+        var url = 'http://blog.kamidox.com';
+        var body = `<link rel="stylesheet" href="./theme/css/foundation.css" />`;
+        var links = utils.getPageLinks(url, body);
+        expect(links.length).toEqual(0);
+    });
+
     it('getPageLinks parent dir', function () {
         var url = 'http://blog.kamidox.com/category';
         var body = '<!doctype html><link rel="stylesheet" href="../theme/css/foundation.css" />';
