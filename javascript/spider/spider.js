@@ -6,6 +6,8 @@ var path = require('path');
 var readFile = utils.promisify(fs.readFile);
 var writeFile = utils.promisify(fs.writeFile);
 
+var _visitedUrls = {};
+
 /**
  * Download the resource specified by `url` and save it to `filename`
  * 
@@ -68,7 +70,10 @@ function _spiderLinks(url, body, nesting) {
     }
     var links = utils.getPageLinks(url, body);
     links.forEach(link => {
-        promise = promise.then(() => spider(link, nesting - 1));
+        if (!_visitedUrls[link]) {
+            _visitedUrls[link] = true;
+            promise = promise.then(() => spider(link, nesting - 1));
+        }
     });
     return promise;
 }

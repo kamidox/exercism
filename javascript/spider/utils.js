@@ -32,8 +32,12 @@ module.exports.urlToFilename = function (url, root='./tmp') {
 module.exports.getPageLinks = function (url, body) {
     var linksSet = new Set();
     var links = [];
+    var validHtml = false;
     var handler = {
         onopentag: function (name, attrs) {
+            if (!validHtml) {
+                return;
+            }
             var tags = {
                 link: 'href',
                 script: 'src',
@@ -50,13 +54,19 @@ module.exports.getPageLinks = function (url, body) {
                 linksSet.add(_normalizeUrl(url, href));
             }
         },
+        onprocessinginstruction: function (name, data) {
+            if (name === '!doctype' && data.endsWith('html')) {
+                validHtml = true;
+            }
+        }
     }
 
     var parser = new htmlParser.Parser(
         handler,
         {
             lowerCaseTags: true,
-            lowerCaseAttributeNames: true
+            lowerCaseAttributeNames: true,
+            decodeEntities: true
         });
     parser.write(body);
     parser.end();
