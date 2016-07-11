@@ -9,7 +9,7 @@ var writeFile = utils.promisify(fs.writeFile);
 var _visitedUrls = {};
 
 var TaskQueue = require('./task-queue');
-var downloadTaskQueue = new TaskQueue(5);
+var downloadTaskQueue = new TaskQueue(10);
 
 /**
  * Download the resource specified by `url` and save it to `filename`
@@ -49,24 +49,20 @@ function spider(url, nesting, root = './tmp') {
     return readFile(fname, 'utf-8')
         .then(body => {
             console.log(`Using exist file ${fname} ...`);
-            _visitedUrls[url] = true;
             if (path.extname(fname) === '.html' || path.extname(fname) === '.htm') {
                 return _spiderLinks(url, body, nesting, root);
-            } else {
-                return Promise.resolve();
             }
+            return Promise.resolve();
         },
         err => {
             if (err.code !== 'ENOENT') {
                 throw err;
             }
             return download(url, fname).then(body => {
-                _visitedUrls[url] = true;
                 if (body.type.includes('text/html')) {
                     return _spiderLinks(url, body.body, nesting, root);
-                } else {
-                    return Promise.resolve();
                 }
+                return Promise.resolve();
             });
         });
 }
@@ -74,25 +70,25 @@ function spider(url, nesting, root = './tmp') {
 function _spiderLinks(url, body, nesting, root) {
     if (nesting === 0) {
         console.warn(`spider: exceed nesting limted for ${url}`);
-        return Promise.resolve();;
+        return Promise.resolve();
     }
 
     var links = utils.getPageLinks(url, body);
     if (links.length === 0) {
-        return Promise.resolve();;
+        console.warn(`spider: zero links in ${url}`);
+        return Promise.resolve();
     }
 
     return new Promise((resolve, reject) => {
-        var completed = 0;
         links.forEach(link => {
             if (!_visitedUrls[link]) {
+                _visitedUrls[link] = true;
                 var task = function () {
                     return spider(link, nesting - 1, root).then(() => {
-                        if (++ completed === links.length) {
-                            resolve();
-                        }
+                        resolve();
                     }).catch(reject);
                 };
+                console.log(`spider: push ${link} to task queue`);
                 downloadTaskQueue.pushTask(task);
             }
         });

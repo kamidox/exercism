@@ -18,9 +18,10 @@ function TaskQueue (concurrency) {
  * Push a task to TaskQueue and schedule the task to run if possible
  * 
  * @param {Object} task - The Promise task to push into TaskQueue
+ * @param {Function} callback - Called when task is resolved or rejected with signature callback(err, task). Optional.
  */
-TaskQueue.prototype.pushTask = function (task) {
-    this.queue.push(task);
+TaskQueue.prototype.pushTask = function (task, callback) {
+    this.queue.push([task, callback]);
     this.nextTask();
 };
 
@@ -28,12 +29,20 @@ TaskQueue.prototype.pushTask = function (task) {
  * Shedule the next task in TaskQueue to run
  */
 TaskQueue.prototype.nextTask = function () {
+
+    function makeCallback(self, task, callback) {
+        return function (err) {
+            if (callback) callback(err, task);
+            self.running --;
+            self.nextTask();
+        }
+    }
+
+
     while (this.running < this.concurrency && this.queue.length > 0) {
-        var task = this.queue.shift();
-        task().then(() => {
-            this.running --;
-            this.nextTask();
-        });
+        var [task, callback] = this.queue.shift();
+        task().then(makeCallback(this, task, callback))
+            .catch(makeCallback(this, task, callback));
         this.running ++;
     }
 };
