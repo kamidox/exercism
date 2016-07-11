@@ -8,6 +8,9 @@ var writeFile = utils.promisify(fs.writeFile);
 
 var _visitedUrls = {};
 
+var TaskQueue = require('./task-queue');
+var downloadTaskQueue = new TaskQueue(5);
+
 /**
  * Download the resource specified by `url` and save it to `filename`
  * 
@@ -34,7 +37,7 @@ function download(url, filename) {
  * Download the resource specified by `url` recursively with the limited `nesting` level. 
  * 
  * @param {string} url - the url to download
- * @param {integer} nesting - nesting level
+ * @param {number} nesting - nesting level
  * @param {string} [root='./tmp'] - root dir to store download resources
  * @returns {Promise} - A Promise Object
  */
@@ -48,7 +51,7 @@ function spider(url, nesting, root = './tmp') {
             console.log(`Using exist file ${fname} ...`);
             _visitedUrls[url] = true;
             if (path.extname(fname) === '.html' || path.extname(fname) === '.htm') {
-                return _spiderLinks(url, body, nesting);
+                return _spiderLinks(url, body, nesting, root);
             } else {
                 return Promise.resolve();
             }
@@ -60,7 +63,7 @@ function spider(url, nesting, root = './tmp') {
             return download(url, fname).then(body => {
                 _visitedUrls[url] = true;
                 if (body.type.includes('text/html')) {
-                    return _spiderLinks(url, body.body, nesting);
+                    return _spiderLinks(url, body.body, nesting, root);
                 } else {
                     return Promise.resolve();
                 }
@@ -68,18 +71,32 @@ function spider(url, nesting, root = './tmp') {
         });
 }
 
-function _spiderLinks(url, body, nesting) {
-    var promise = Promise.resolve();
+function _spiderLinks(url, body, nesting, root) {
     if (nesting === 0) {
-        return promise;
+        console.warn(`spider: exceed nesting limted for ${url}`);
+        return Promise.resolve();;
     }
+
     var links = utils.getPageLinks(url, body);
-    links.forEach(link => {
-        if (!_visitedUrls[link]) {
-            promise = promise.then(() => spider(link, nesting - 1));
-        }
+    if (links.length === 0) {
+        return Promise.resolve();;
+    }
+
+    return new Promise((resolve, reject) => {
+        var completed = 0;
+        links.forEach(link => {
+            if (!_visitedUrls[link]) {
+                var task = function () {
+                    return spider(link, nesting - 1, root).then(() => {
+                        if (++ completed === links.length) {
+                            resolve();
+                        }
+                    }).catch(reject);
+                };
+                downloadTaskQueue.pushTask(task);
+            }
+        });
     });
-    return promise;
 }
 
 module.exports.download = download;
