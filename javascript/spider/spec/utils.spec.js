@@ -119,4 +119,12 @@ describe('utils', function () {
         expect(links[1]).toEqual(url + 'images/2.png');
         expect(links[2]).toEqual('https://blog.kamidox.com/images/3.png');
     });
+
+    it('getPageLinks remove hash', function () {
+        var url = 'http://blog.kamidox.com/';
+        var body = '<!doctype html><li><a href="about.html#hash_link">About</a></li>';
+        var links = utils.getPageLinks(url, body);
+        expect(links.length).toEqual(1);
+        expect(links[0]).toEqual('http://blog.kamidox.com/about.html');
+    });
 });

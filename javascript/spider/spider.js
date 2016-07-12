@@ -39,14 +39,10 @@ function download(url, filename) {
  * @returns {Promise} - A Promise Object
  */
 function spider(url, nesting, root = './tmp') {
-    if (_visitedUrls[url]) {
-        return Promise.resolve();
-    }
     var fname = utils.urlToFilename(url, root);
     return readFile(fname, 'utf-8')
         .then(body => {
             console.log(`Using exist file ${fname} ...`);
-            _visitedUrls[url] = true;
             if (path.extname(fname) === '.html' || path.extname(fname) === '.htm') {
                 return _spiderLinks(url, body, nesting);
             } else {
@@ -58,7 +54,6 @@ function spider(url, nesting, root = './tmp') {
                 throw err;
             }
             return download(url, fname).then(body => {
-                _visitedUrls[url] = true;
                 if (body.type.includes('text/html')) {
                     return _spiderLinks(url, body.body, nesting);
                 } else {
@@ -76,6 +71,7 @@ function _spiderLinks(url, body, nesting) {
     var links = utils.getPageLinks(url, body);
     links.forEach(link => {
         if (!_visitedUrls[link]) {
+            _visitedUrls[link] = true;
             promise = promise.then(() => spider(link, nesting - 1));
         }
     });

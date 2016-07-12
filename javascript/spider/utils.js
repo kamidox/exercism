@@ -82,5 +82,11 @@ function _isSameDomain(url, href) {
 }
 
 function _normalizeUrl(url, href) {
-    return urlParser.resolve(url, href);
+    var dstUrl = urlParser.parse(href);
+    var p = dstUrl.path ? dstUrl.path : '';
+    if (dstUrl.host === null || dstUrl.protocol === null) {
+        return urlParser.resolve(url, p);
+    } else {
+        return urlParser.resolve(href, p);
+    }
 }
