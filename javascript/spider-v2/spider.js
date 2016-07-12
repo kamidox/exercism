@@ -9,7 +9,11 @@ var writeFile = utils.promisify(fs.writeFile);
 var _visitedUrls = {};
 
 var TaskQueue = require('./task-queue');
-var downloadTaskQueue = new TaskQueue(10);
+var downloadTaskQueue = new TaskQueue(5);
+
+downloadTaskQueue.drain = function () {
+    console.log('Download completed.');
+}
 
 /**
  * Download the resource specified by `url` and save it to `filename`
@@ -19,7 +23,7 @@ var downloadTaskQueue = new TaskQueue(10);
  * @returns Promise Object
  */
 function download(url, filename) {
-    console.log(`Downloading ${url} ...`);
+    console.log(`Downloading ${url} ... [concurrency=${downloadTaskQueue.running}]`);
     var body = {};
     return request(url).then((results) => {
         body.type = results[0].headers['content-type'].toLowerCase();
@@ -42,15 +46,12 @@ function download(url, filename) {
  * @returns {Promise} - A Promise Object
  */
 function spider(url, nesting, root = './tmp') {
-    if (_visitedUrls[url]) {
-        return Promise.resolve();
-    }
     var fname = utils.urlToFilename(url, root);
     return readFile(fname, 'utf-8')
         .then(body => {
-            console.log(`Using exist file ${fname} ...`);
+            console.log(`Using exist file ${fname} ... [concurrency=${downloadTaskQueue.running}]`);
             if (path.extname(fname) === '.html' || path.extname(fname) === '.htm') {
-                return _spiderLinks(url, body, nesting, root);
+                _spiderLinks(url, body, nesting, root);
             }
             return Promise.resolve();
         },
@@ -60,7 +61,7 @@ function spider(url, nesting, root = './tmp') {
             }
             return download(url, fname).then(body => {
                 if (body.type.includes('text/html')) {
-                    return _spiderLinks(url, body.body, nesting, root);
+                    _spiderLinks(url, body.body, nesting, root);
                 }
                 return Promise.resolve();
             });
@@ -79,19 +80,14 @@ function _spiderLinks(url, body, nesting, root) {
         return Promise.resolve();
     }
 
-    return new Promise((resolve, reject) => {
-        links.forEach(link => {
-            if (!_visitedUrls[link]) {
-                _visitedUrls[link] = true;
-                var task = function () {
-                    return spider(link, nesting - 1, root).then(() => {
-                        resolve();
-                    }).catch(reject);
-                };
-                console.log(`spider: push ${link} to task queue`);
-                downloadTaskQueue.pushTask(task);
-            }
-        });
+    links.forEach(link => {
+        if (!_visitedUrls[link]) {
+            _visitedUrls[link] = true;
+            var task = function () {
+                return spider(link, nesting - 1, root);
+            };
+            downloadTaskQueue.pushTask(task);
+        }
     });
 }
 

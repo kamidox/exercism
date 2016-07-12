@@ -41,11 +41,19 @@ TaskQueue.prototype.nextTask = function () {
 
     while (this.running < this.concurrency && this.queue.length > 0) {
         var [task, callback] = this.queue.shift();
-        task().then(makeCallback(this, task, callback))
-            .catch(makeCallback(this, task, callback));
+        var cb = makeCallback(this, task, callback);
+        task().then(cb, cb);
         this.running ++;
     }
+
+    if (this.running + this.queue.length === 0) {
+        this.drain();
+    }
 };
+
+TaskQueue.drain = function () {
+    console.log('Task queue is drained.')
+}
 
 module.exports = TaskQueue;
 

@@ -46,4 +46,19 @@ describe('task-queue', function () {
             done();
         }));
     });
+
+    it('drain', function (done) {
+        var q = new TaskQueue(2);
+
+        var order = [];
+        q.drain = function () {
+            expect(order).toEqual(['task 1', 'task 2', 'task 3', 'task 4']);
+            done();
+        }
+
+        q.pushTask(createTask(1, 10, order, false));
+        q.pushTask(createTask(2, 20, order, false));
+        q.pushTask(createTask(3, 15, order, false));
+        q.pushTask(createTask(4, 50, order, false));
+    });
 });
