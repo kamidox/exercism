@@ -8,10 +8,7 @@ type CellContext struct {
 	value         int
 	preValue      int
 	computedCells []*CellContext // cells which will computed base on this cell
-	dependCell1   *CellContext   // first depend cell for a computed cell
-	dependCell2   *CellContext   // second depend cell for a computed cell
-	computeFunc1  func(int) int
-	computeFunc2  func(int, int) int
+	computeFunc   func() int
 	callback      []*CellCallback
 }
 
@@ -25,15 +22,9 @@ func (c *CellContext) Value() int {
 }
 
 func updateComputedValue(c *CellContext) {
-	var newValue int
 	for _, cell := range c.computedCells {
-		if cell.dependCell2 != nil {
-			newValue = cell.computeFunc2(cell.dependCell1.value, cell.dependCell2.value)
-		} else {
-			newValue = cell.computeFunc1(cell.dependCell1.value)
-		}
 		cell.preValue = cell.value
-		cell.value = newValue
+		cell.value = cell.computeFunc()
 	}
 	// breadth first for computed cells
 	for _, cell := range c.computedCells {
@@ -42,7 +33,6 @@ func updateComputedValue(c *CellContext) {
 }
 
 func triggerCallback(c *CellContext) {
-	fmt.Printf("preValue=%v value=%v callbacks=%v\n", c.preValue, c.value, len(c.callback))
 	if c.preValue != c.value {
 		c.preValue = c.value
 		for _, cb := range c.callback {
@@ -101,23 +91,29 @@ func (r *ReactorContext) CreateInput(v int) InputCell {
 }
 
 func (r *ReactorContext) CreateCompute1(c Cell, computeFunc func(int) int) ComputeCell {
+	f := func() int {
+		return computeFunc(c.Value())
+	}
 	newCi := CellContext{}
-	newCi.dependCell1 = c.(*CellContext)
-	newCi.computeFunc1 = computeFunc
-	newCi.value = computeFunc(newCi.dependCell1.value)
+	newCi.computeFunc = f
+	newCi.value = f()
 	newCi.preValue = newCi.value
-	newCi.dependCell1.computedCells = append(newCi.dependCell1.computedCells, &newCi)
+	inputCell := c.(*CellContext)
+	inputCell.computedCells = append(inputCell.computedCells, &newCi)
 	return &newCi
 }
 
 func (r *ReactorContext) CreateCompute2(c1 Cell, c2 Cell, computeFunc func(int, int) int) ComputeCell {
+	f := func() int {
+		return computeFunc(c1.Value(), c2.Value())
+	}
 	newCi := CellContext{}
-	newCi.dependCell1 = c1.(*CellContext)
-	newCi.dependCell2 = c2.(*CellContext)
-	newCi.computeFunc2 = computeFunc
-	newCi.dependCell1.computedCells = append(newCi.dependCell1.computedCells, &newCi)
-	newCi.dependCell2.computedCells = append(newCi.dependCell2.computedCells, &newCi)
-	newCi.value = computeFunc(newCi.dependCell1.value, newCi.dependCell2.value)
+	newCi.computeFunc = f
+	newCi.value = f()
 	newCi.preValue = newCi.value
+	inputCell1 := c1.(*CellContext)
+	inputCell2 := c2.(*CellContext)
+	inputCell1.computedCells = append(inputCell1.computedCells, &newCi)
+	inputCell2.computedCells = append(inputCell2.computedCells, &newCi)
 	return &newCi
 }
