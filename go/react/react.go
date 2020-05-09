@@ -2,26 +2,26 @@ package react
 
 import "fmt"
 
-type ReactorContext struct{}
+type reactorContext struct{}
 
-type CellContext struct {
+type cellContext struct {
 	value         int
 	preValue      int
-	computedCells []*CellContext // cells which will computed base on this cell
+	computedCells []*cellContext // cells which will computed base on this cell
 	computeFunc   func() int
-	callback      []*CellCallback
+	callback      []*cellCallback
 }
 
-type CellCallback struct {
+type cellCallback struct {
 	cb   func(int)
-	cell *CellContext
+	cell *cellContext
 }
 
-func (c *CellContext) Value() int {
+func (c *cellContext) Value() int {
 	return c.value
 }
 
-func updateComputedValue(c *CellContext) {
+func updateComputedValue(c *cellContext) {
 	for _, cell := range c.computedCells {
 		cell.preValue = cell.value
 		cell.value = cell.computeFunc()
@@ -32,7 +32,7 @@ func updateComputedValue(c *CellContext) {
 	}
 }
 
-func triggerCallback(c *CellContext) {
+func triggerCallback(c *cellContext) {
 	if c.preValue != c.value {
 		c.preValue = c.value
 		for _, cb := range c.callback {
@@ -45,20 +45,20 @@ func triggerCallback(c *CellContext) {
 	}
 }
 
-func (c *CellContext) SetValue(v int) {
+func (c *cellContext) SetValue(v int) {
 	c.preValue = c.value
 	c.value = v
 	updateComputedValue(c)
 	triggerCallback(c)
 }
 
-func (c *CellContext) AddCallback(cb func(int)) Canceler {
-	cellCb := CellCallback{cb, c}
+func (c *cellContext) AddCallback(cb func(int)) Canceler {
+	cellCb := cellCallback{cb, c}
 	c.callback = append(c.callback, &cellCb)
 	return Canceler(&cellCb)
 }
 
-func (cellCb *CellCallback) Cancel() {
+func (cellCb *cellCallback) Cancel() {
 	idx := -1
 	cbLen := len(cellCb.cell.callback)
 	if cbLen <= 0 {
@@ -79,40 +79,41 @@ func (cellCb *CellCallback) Cancel() {
 	cellCb.cell.callback = cellCb.cell.callback[:cbLen-1]
 }
 
+// New reactor
 func New() Reactor {
-	return &ReactorContext{}
+	return &reactorContext{}
 }
 
-func (r *ReactorContext) CreateInput(v int) InputCell {
-	ci := CellContext{}
+func (r *reactorContext) CreateInput(v int) InputCell {
+	ci := cellContext{}
 	ci.value = v
 	ci.preValue = ci.value
 	return &ci
 }
 
-func (r *ReactorContext) CreateCompute1(c Cell, computeFunc func(int) int) ComputeCell {
+func (r *reactorContext) CreateCompute1(c Cell, computeFunc func(int) int) ComputeCell {
 	f := func() int {
 		return computeFunc(c.Value())
 	}
-	newCi := CellContext{}
+	newCi := cellContext{}
 	newCi.computeFunc = f
 	newCi.value = f()
 	newCi.preValue = newCi.value
-	inputCell := c.(*CellContext)
+	inputCell := c.(*cellContext)
 	inputCell.computedCells = append(inputCell.computedCells, &newCi)
 	return &newCi
 }
 
-func (r *ReactorContext) CreateCompute2(c1 Cell, c2 Cell, computeFunc func(int, int) int) ComputeCell {
+func (r *reactorContext) CreateCompute2(c1 Cell, c2 Cell, computeFunc func(int, int) int) ComputeCell {
 	f := func() int {
 		return computeFunc(c1.Value(), c2.Value())
 	}
-	newCi := CellContext{}
+	newCi := cellContext{}
 	newCi.computeFunc = f
 	newCi.value = f()
 	newCi.preValue = newCi.value
-	inputCell1 := c1.(*CellContext)
-	inputCell2 := c2.(*CellContext)
+	inputCell1 := c1.(*cellContext)
+	inputCell2 := c2.(*cellContext)
 	inputCell1.computedCells = append(inputCell1.computedCells, &newCi)
 	inputCell2.computedCells = append(inputCell2.computedCells, &newCi)
 	return &newCi
